@@ -1,5 +1,7 @@
 # Food Order App - React
 
+[Live Preview](https://food-order-app-eta-one.vercel.app)
+
 ## Description
 
 A Wholesome Project to practice React Hooks including State, Side Effects, Reducer, Context - The Complete Guide by Academind
@@ -31,3 +33,4 @@ To get the frontend running locally:
 - Clone this repo
 - `npm install` to install all required dependencies
 - `npm start` to start the local server
+
