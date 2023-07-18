@@ -8,7 +8,8 @@ import Checkout from './Checkout'
 
 const Cart = (props) => {
     const cartCtx = useContext(CartContext);
-
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [didSubmit, setIDidSubmit] = useState(false);
     const [ischeckout, setIsCheckout] = useState(false)
     const totalAmount = `$${cartCtx.totalAmount.toFixed(2)}`;
     const hasItems = cartCtx.items.length > 0;
@@ -24,6 +25,21 @@ const Cart = (props) => {
         setIsCheckout(true)
     }
 
+    const submitOrderHandler = async (userData) => {
+        setIsSubmitting(true);
+        await fetch('https://food-order-app-4b994-default-rtdb.firebaseio.com/orders.json',
+            {
+                method: 'POST',
+                body: JSON.stringify({
+                    user: userData,
+                    orderedItems: cartCtx.items
+                })
+            });
+        setIsSubmitting(false);
+        setIDidSubmit(true);
+        cartCtx.clearCart();
+    }
+
     const CartItems = <ul className={styles['cart-items']}>
         {cartCtx.items.map((item) =>
             <CartItem
@@ -36,19 +52,36 @@ const Cart = (props) => {
 
             />)}
     </ul>
-    const modalActions = (<div className={styles.actions}>
-        <button className={styles['button--alt']} onClick={props.onHideCart}>Close</button>
-        {hasItems && <button className={styles.button} onClick={orderHandler}>Order</button>}
-    </div>)
-    return (
-        <Modal onClose={props.onHideCart}>
+    const modalActions = (
+        <div className={styles.actions}>
+            <button className={styles['button--alt']} onClick={props.onHideCart}>Close</button>
+            {hasItems && <button className={styles.button} onClick={orderHandler}>Order</button>}
+        </div>)
+    const cartModalContent = (
+        <React.Fragment>
             {CartItems}
             <div className={styles.total}>
                 <span>Total Amount</span>
                 <span>{totalAmount}</span>
             </div>
-            {ischeckout && <Checkout onCancel={props.onHideCart} />}
+            {ischeckout && <Checkout onConfirm={submitOrderHandler} onCancel={props.onHideCart} />}
             {!ischeckout && modalActions}
+        </React.Fragment>)
+
+    const isSubmittingModalContent = (<p>Sending Order data...</p>)
+
+    const didSubitModalContent = (
+        <React.Fragment>
+            <p>Successfully sent the order.</p>
+            <div className={styles.actions}>
+                <button className={styles.button} onClick={props.onHideCart}>Close</button>
+            </div>
+        </React.Fragment>)
+    return (
+        <Modal onClose={props.onHideCart}>
+            {!isSubmitting && !didSubmit && cartModalContent}
+            {isSubmitting && isSubmittingModalContent}
+            {!isSubmitting && didSubmit && didSubitModalContent}
 
         </Modal>
     )
